@@ -6,7 +6,7 @@ An explicit, compile-time safe object mapper for .NET. Map every property yourse
 
 ## Why XplicitMapper?
 
-Unlike AutoMapper or Mapster which use convention-based auto-mapping, XplicitMapper requires you to **explicitly define every mapping**. This means:
+XplicitMapper requires you to **explicitly define every mapping**. This means:
 
 - ✅ **No hidden behavior** - Every mapping is visible in your code
 - ✅ **Compile-time safety** - Refactoring won't silently break your mappings
