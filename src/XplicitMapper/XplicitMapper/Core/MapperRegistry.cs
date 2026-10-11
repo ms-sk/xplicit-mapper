@@ -25,6 +25,21 @@ public class MapperRegistry : IMapperRegistry
     }
 
     /// <summary>
+    /// Registers an async mapper instance for its type pair.
+    /// </summary>
+    /// <typeparam name="TSource">Source type</typeparam>
+    /// <typeparam name="TDestination">Destination type</typeparam>
+    /// <param name="mapper">The async mapper instance</param>
+    public void Register<TSource, TDestination>(IAsyncXMapper<TSource, TDestination> mapper)
+    {
+        if (mapper == null)
+            throw new ArgumentNullException(nameof(mapper));
+
+        var key = (typeof(TSource), typeof(TDestination));
+        _mappers[key] = mapper;
+    }
+
+    /// <summary>
     /// Registers a mapper instance for the specified type pair.
     /// </summary>
     /// <param name="sourceType">Source type</param>
@@ -54,6 +69,25 @@ public class MapperRegistry : IMapperRegistry
     {
         var key = (typeof(TSource), typeof(TDestination));
         if (_mappers.TryGetValue(key, out var obj) && obj is IXMapper<TSource, TDestination> typed)
+        {
+            mapper = typed;
+            return true;
+        }
+        mapper = null;
+        return false;
+    }
+
+    /// <summary>
+    /// Attempts to get an async mapper for the specified type pair.
+    /// </summary>
+    /// <typeparam name="TSource">Source type</typeparam>
+    /// <typeparam name="TDestination">Destination type</typeparam>
+    /// <param name="mapper">The async mapper if found</param>
+    /// <returns>True if found, false otherwise</returns>
+    public bool TryGetAsync<TSource, TDestination>([System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out IAsyncXMapper<TSource, TDestination>? mapper)
+    {
+        var key = (typeof(TSource), typeof(TDestination));
+        if (_mappers.TryGetValue(key, out var obj) && obj is IAsyncXMapper<TSource, TDestination> typed)
         {
             mapper = typed;
             return true;

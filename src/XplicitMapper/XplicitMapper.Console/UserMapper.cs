@@ -7,7 +7,7 @@ namespace XplicitMapper.Console
     {
         public void AfterMap(User source, UserDto destination, MappingContext context)
         {
-            source.Email = source.Email.ToLower();
+            destination.Email = destination.Email.ToLower();
         }
 
         public void BeforeMap(User source, UserDto destination, MappingContext context)

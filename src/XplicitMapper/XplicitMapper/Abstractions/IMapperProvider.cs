@@ -39,4 +39,44 @@ public interface IMapperProvider
     /// <param name="source">The source object to map</param>
     /// <returns>The mapped destination object</returns>
     TDestination Map<TSource, TDestination>(TSource source);
+
+    /// <summary>
+    /// Asynchronously maps a source object to destination type.
+    /// Uses IAsyncXMapper&lt;,&gt; if registered; otherwise falls back to wrapping IXMapper&lt;,&gt;.
+    /// </summary>
+    /// <typeparam name="TSource">Source type</typeparam>
+    /// <typeparam name="TDestination">Destination type</typeparam>
+    /// <param name="source">The source object to map</param>
+    /// <param name="cancellationToken">A token to cancel the operation</param>
+    /// <returns>A task representing the mapped destination object</returns>
+    Task<TDestination> MapAsync<TSource, TDestination>(TSource source, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Attempts to map a source object to destination type without throwing if no mapper is registered.
+    /// </summary>
+    /// <typeparam name="TSource">Source type</typeparam>
+    /// <typeparam name="TDestination">Destination type</typeparam>
+    /// <param name="source">The source object to map</param>
+    /// <param name="destination">The mapped destination object, or default if no mapper is registered</param>
+    /// <returns>True if mapping succeeded, false if no mapper is registered</returns>
+    bool TryMap<TSource, TDestination>(TSource source, out TDestination destination);
+
+    /// <summary>
+    /// Attempts to map a source object to destination type without throwing if no mapper is registered.
+    /// </summary>
+    /// <typeparam name="TSource">Source type</typeparam>
+    /// <typeparam name="TDestination">Destination type</typeparam>
+    /// <param name="source">The source object to map</param>
+    /// <returns>The mapped destination object, or default if no mapper is registered</returns>
+    TDestination? TryMap<TSource, TDestination>(TSource source);
+
+    /// <summary>
+    /// Attempts to asynchronously map a source object to destination type without throwing if no mapper is registered.
+    /// </summary>
+    /// <typeparam name="TSource">Source type</typeparam>
+    /// <typeparam name="TDestination">Destination type</typeparam>
+    /// <param name="source">The source object to map</param>
+    /// <param name="cancellationToken">A token to cancel the operation</param>
+    /// <returns>A task returning the mapped destination object, or default if no mapper is registered</returns>
+    Task<TDestination?> TryMapAsync<TSource, TDestination>(TSource source, CancellationToken cancellationToken = default);
 }

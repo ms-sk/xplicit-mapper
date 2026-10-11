@@ -5,6 +5,7 @@ using XplicitMapper.Abstractions;
 using XplicitMapper.Console;
 using XplicitMapper.Core;
 using XplicitMapper.DependencyInjection;
+using XplicitMapper.Extensions;
 
 var services = new ServiceCollection();
 services.AddXplicitMapper(opt =>
@@ -16,5 +17,13 @@ services.AddXplicitMapper(opt =>
 var provider = services.BuildServiceProvider();
 
 var mapper = provider.GetService<IMapperProvider>()!;
-var userDto = mapper.Map<User, UserDto>(new User { Login = "John Doe", Email = "jOhN@examPLe.com" });
+
+var list = new List<User>() { new User { Login = "John Doe", Email = "jOhN@examPLe.com" }
+
+};
+
+var userDtos = list.MapToList<User, UserDto>(mapper);
+
+
+var userDto = mapper.Map<User, UserDto>();
 Console.ReadLine();

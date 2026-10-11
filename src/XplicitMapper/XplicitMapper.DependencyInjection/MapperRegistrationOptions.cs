@@ -100,11 +100,14 @@ public class MapperRegistrationOptions
 
     private void RegisterMapperType(Type mapperType)
     {
-        // Find all IXMapper<,> interfaces this type implements
-        var ixMapperGeneric = typeof(IXMapper<,>);
+        // Find all IXMapper<,> and IAsyncMapper<,> interfaces this type implements
+        var syncMapperGeneric = typeof(IXMapper<,>);
+        var asyncMapperGeneric = typeof(IAsyncXMapper<,>);
 
         var interfaces = mapperType.GetInterfaces()
-            .Where(i => i.IsGenericType && i.GetGenericTypeDefinition() == ixMapperGeneric)
+            .Where(i => i.IsGenericType && 
+                (i.GetGenericTypeDefinition() == syncMapperGeneric || 
+                 i.GetGenericTypeDefinition() == asyncMapperGeneric))
             .ToList();
 
         foreach (var interfaceType in interfaces)
