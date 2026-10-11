@@ -131,8 +131,12 @@ internal class ServiceProviderMapperProvider : IMapperProvider, IMapperRegistry
             return HandleCircularReference<TDestination>();
         }
 
+        TDestination result = default!;
         try
         {
+            // Debug dump: Before mapping
+            _options.InvokeBeforeMapDump(sourceType, destType, source, context);
+
             var destination = Activator.CreateInstance<TDestination>();
 
             // BeforeMap hook
@@ -141,7 +145,6 @@ internal class ServiceProviderMapperProvider : IMapperProvider, IMapperRegistry
                 beforeMap.BeforeMap(source, destination, context);
             }
 
-            TDestination result;
             if (mapper is IXMapperEx<TSource, TDestination> mapperEx)
             {
                 mapperEx.Map(source, destination);
@@ -157,6 +160,9 @@ internal class ServiceProviderMapperProvider : IMapperProvider, IMapperRegistry
             {
                 afterMap.AfterMap(source, result, context);
             }
+
+            // Debug dump: After mapping
+            _options.InvokeAfterMapDump(sourceType, destType, source, result, context);
 
             return result;
         }
