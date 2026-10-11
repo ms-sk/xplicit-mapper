@@ -1,0 +1,26 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    
+    <!-- Package metadata -->
+    <PackageId>XplicitMapper.DependencyInjection</PackageId>
+    <Version>1.0.0</Version>
+    <Authors>XplicitMapper Contributors</Authors>
+    <Description>Microsoft.Extensions.DependencyInjection integration for XplicitMapper.</Description>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageTags>mapper;mapping;object-mapper;explicit-mapper;dependency-injection;di;iservicecollection</PackageTags>
+    <RepositoryUrl>https://github.com/ms-sk/xplicit-mapper</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <GenerateDocumentationFile>True</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\XplicitMapper\XplicitMapper.csproj" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.0" />
+  </ItemGroup>
+
+</Project>

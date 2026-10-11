@@ -1,3 +1,5 @@
 <Solution>
   <Project Path="XplicitMapper/XplicitMapper.csproj" />
+  <Project Path="XplicitMapper.DependencyInjection/XplicitMapper.DependencyInjection.csproj" />
+  <Project Path="XplicitMapper.Tests/XplicitMapper.Tests.csproj" />
 </Solution>
