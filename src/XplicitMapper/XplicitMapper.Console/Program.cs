@@ -23,7 +23,4 @@ var list = new List<User>() { new User { Login = "John Doe", Email = "jOhN@examP
 };
 
 var userDtos = list.MapToList<User, UserDto>(mapper);
-
-
-var userDto = mapper.Map<User, UserDto>();
 Console.ReadLine();
