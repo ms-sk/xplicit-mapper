@@ -1,10 +1,10 @@
-# XplizitMapper - Implementation Plan
+# XplicitMapper - Implementation Plan
 
 > An explicit, convention-over-magic object mapper for .NET where **you** control every mapping.
 
 ## Overview
 
-XplizitMapper is designed for developers who prefer explicit mapping over AutoMapper's convention-based approach. Every property mapping is intentional and visible in your code.
+XplicitMapper is designed for developers who prefer explicit mapping over AutoMapper's convention-based approach. Every property mapping is intentional and visible in your code.
 
 - **Target Framework**: net10.0
 - **License**: MIT
@@ -21,3 +21,7 @@ XplizitMapper is designed for developers who prefer explicit mapping over AutoMa
 ## GitHub Issues
 
 This plan has been broken down into GitHub issues. See repository issues for individual tasks.
+
+## Renamed
+
+Project renamed from XplizitMapper to XplicitMapper on 2026-10-11.
