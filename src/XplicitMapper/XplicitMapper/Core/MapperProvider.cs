@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using XplicitMapper.Abstractions;
 
 namespace XplicitMapper.Core;
@@ -52,6 +53,14 @@ public class MapperProvider : IMapperProvider, IMapperRegistry
     public void Register(Type sourceType, Type destinationType, object mapper)
     {
         _registry.Register(sourceType, destinationType, mapper);
+    }
+
+    /// <summary>
+    /// Registers a projection mapper for the specified type pair.
+    /// </summary>
+    public void RegisterProjection<TSource, TDestination>(IXMapperProjection<TSource, TDestination> mapper)
+    {
+        _registry.RegisterProjection(mapper);
     }
 
     /// <summary>
@@ -326,5 +335,35 @@ public class MapperProvider : IMapperProvider, IMapperRegistry
             return await MapAsync<TSource, TDestination>(source, cancellationToken);
         }
         return default;
+    }
+
+    /// <summary>
+    /// Gets a projection expression for the specified type pair.
+    /// </summary>
+    /// <exception cref="InvalidOperationException">Thrown if no projection mapper is registered</exception>
+    public Expression<Func<TSource, TDestination>> GetProjection<TSource, TDestination>()
+    {
+        if (_registry.TryGetProjection<TSource, TDestination>(out var projectionMapper))
+        {
+            return projectionMapper!.GetProjection();
+        }
+
+        throw new InvalidOperationException(
+            $"No projection mapper registered for {typeof(TSource).Name} -> {typeof(TDestination).Name}. " +
+            $"Register a mapper implementing IXMapperProjection<{typeof(TSource).Name}, {typeof(TDestination).Name}>.");
+    }
+
+    /// <summary>
+    /// Applies the registered projection to an <see cref="IQueryable{T}"/>,
+    /// returning an <see cref="IQueryable{TDestination}"/> that can be executed
+    /// on the database server (e.g., via EF Core).
+    /// </summary>
+    public IQueryable<TDestination> ProjectTo<TSource, TDestination>(IQueryable<TSource> source)
+    {
+        if (source == null)
+            throw new ArgumentNullException(nameof(source));
+
+        var expression = GetProjection<TSource, TDestination>();
+        return source.Select(expression);
     }
 }

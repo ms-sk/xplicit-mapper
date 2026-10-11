@@ -1,4 +1,4 @@
-using System.Reflection;
+using System.Linq.Expressions;
 using Microsoft.Extensions.DependencyInjection;
 using XplicitMapper.Abstractions;
 using XplicitMapper.Core;
@@ -379,5 +379,61 @@ internal class ServiceProviderMapperProvider : IMapperProvider, IMapperRegistry
             return await MapAsync<TSource, TDestination>(source, cancellationToken);
         }
         return default;
+    }
+
+    /// <summary>
+    /// Registers a projection mapper for the specified type pair.
+    /// </summary>
+    public void RegisterProjection<TSource, TDestination>(IXMapperProjection<TSource, TDestination> mapper)
+    {
+        _explicitRegistry.RegisterProjection(mapper);
+    }
+
+    /// <summary>
+    /// Gets a projection expression for the specified type pair.
+    /// Checks explicit registry first, then DI.
+    /// </summary>
+    /// <exception cref="InvalidOperationException">Thrown if no projection mapper is registered</exception>
+    public Expression<Func<TSource, TDestination>> GetProjection<TSource, TDestination>()
+    {
+        // First check explicit registry
+        if (_explicitRegistry.TryGetProjection<TSource, TDestination>(out var projectionMapper))
+        {
+            return projectionMapper!.GetProjection();
+        }
+
+        // Then try to resolve from DI
+        var serviceType = typeof(IXMapperProjection<TSource, TDestination>);
+        var resolved = _serviceProvider.GetService(serviceType);
+        if (resolved is IXMapperProjection<TSource, TDestination> typed)
+        {
+            return typed.GetProjection();
+        }
+
+        // Try enumerable
+        var enumerables = _serviceProvider.GetServices(serviceType);
+        var first = enumerables.OfType<IXMapperProjection<TSource, TDestination>>().FirstOrDefault();
+        if (first != null)
+        {
+            return first.GetProjection();
+        }
+
+        throw new InvalidOperationException(
+            $"No projection mapper registered for {typeof(TSource).Name} -> {typeof(TDestination).Name}. " +
+            $"Register a mapper implementing IXMapperProjection<{typeof(TSource).Name}, {typeof(TDestination).Name}>.");
+    }
+
+    /// <summary>
+    /// Applies the registered projection to an <see cref="IQueryable{T}"/>,
+    /// returning an <see cref="IQueryable{TDestination}"/> that can be executed
+    /// on the database server (e.g., via EF Core).
+    /// </summary>
+    public IQueryable<TDestination> ProjectTo<TSource, TDestination>(IQueryable<TSource> source)
+    {
+        if (source == null)
+            throw new ArgumentNullException(nameof(source));
+
+        var expression = GetProjection<TSource, TDestination>();
+        return source.Select(expression);
     }
 }

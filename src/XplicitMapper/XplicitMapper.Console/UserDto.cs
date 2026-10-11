@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace XplicitMapper.Console
+﻿namespace XplicitMapper.Console
 {
     public sealed class UserDto
     {

@@ -439,6 +439,69 @@ if (dto2 != null) { /* ... */ }
 var dto3 = await _mapperProvider.TryMapAsync<Product, ProductDto>(product, ct);
 ```
 
+### LINQ Projection (EF Core / IQueryable)
+
+XplicitMapper supports LINQ projection via `IXMapperProjection<TSource, TDestination>`. Instead of mapping in-memory, you provide an `Expression<Func<...>>` that EF Core translates to SQL — the projection runs on the database server.
+
+#### Example: Projection mapper
+
+```csharp
+public class UserProjectionMapper : IXMapperProjection<User, UserDto>
+{
+    public Expression<Func<User, UserDto>> GetProjection()
+    {
+        return user => new UserDto
+        {
+            Id = user.Id,
+            FullName = user.FirstName + " " + user.LastName,
+            Email = user.Email
+        };
+    }
+}
+```
+
+#### Registering and using
+
+```csharp
+// Register
+provider.RegisterProjection(new UserProjectionMapper());
+
+// Or with DI
+builder.Services.AddXplicitMapper(opt =>
+{
+    opt.ScanAssemblyContaining<UserProjectionMapper>();  // Discovers projection mappers too
+});
+
+// Usage with EF Core — projection runs in SQL
+var dtos = await dbContext.Users
+    .Where(u => u.IsActive)
+    .ProjectTo<User, UserDto>(provider)
+    .ToListAsync();
+```
+
+#### Extension method on IQueryable
+
+```csharp
+// Natural fluent style
+var results = queryable.ProjectTo<User, UserDto>(provider);
+
+// Or via the provider directly
+var results2 = provider.ProjectTo<User, UserDto>(queryable);
+```
+
+#### Combined with filters
+
+```csharp
+var dtos = await dbContext.Users
+    .Where(u => u.Department == "Engineering")
+    .OrderBy(u => u.LastName)
+    .ProjectTo<User, UserDto>(provider)
+    .Skip(10)
+    .Take(20)
+    .ToListAsync();
+// Only the selected columns are fetched from the database
+```
+
 ### Mapping Validation
 
 ```csharp
@@ -483,13 +546,14 @@ public class UserDto
 |-----------|-------------|
 | `IXMapper<TSource, TDestination>` | Core sync interface - implement `Map()` method |
 | `IXMapperEx<TSource, TDestination>` | Optional sync - implement `Map(existing)` for mapping into existing objects |
+| `IXMapperProjection<TSource, TDestination>` | **LINQ projection** - implement `GetProjection()` to return an `Expression<Func<...>>` for use with `IQueryable.Select()` / EF Core |
 | `IBeforeMap<TSource, TDestination>` | Sync hook - `BeforeMap()` called before mapping |
 | `IAfterMap<TSource, TDestination>` | Sync hook - `AfterMap()` called after mapping |
 | `IAsyncXMapper<TSource, TDestination>` | **Async interface** for I/O-bound mappers - implement `MapAsync()` (e.g., EF Core, HTTP calls) - "X" for eXplicit, consistent with `IXMapper` |
 | `IAsyncXMapperEx<TSource, TDestination>` | Optional async - `MapAsync(existing)` for mapping into existing objects |
 | `IBeforeMapAsync<TSource, TDestination>` | Async hook - `BeforeMapAsync()` |
 | `IAfterMapAsync<TSource, TDestination>` | Async hook - `AfterMapAsync()` |
-| `IMapperProvider` | Resolve and use registered mappers (sync + async) |
+| `IMapperProvider` | Resolve and use registered mappers (sync + async + projection) |
 | `IMapperRegistry` | Register mappers (implemented by `MapperProvider`) |
 
 ### Convenient Extension Methods (on `IMapperProvider` and objects)
@@ -508,6 +572,9 @@ public class UserDto
 | `provider.MapEachAsync<TSource, TDestination>(asyncEnumerable, ct)` | Works directly with `IAsyncEnumerable<T>` (EF Core streaming) |
 | `provider.MapToList<...>()` / `provider.MapToArray<...>()` | Collection to `List<T>` or `T[]` |
 | `await provider.MapToListAsync<...>()` / `await provider.MapToArrayAsync<...>()` | Async collection materialization |
+| `queryable.ProjectTo<TSource, TDestination>(provider)` | **LINQ projection** - applies the registered projection expression to an `IQueryable`, returning `IQueryable<TDestination>` (executes on database server with EF Core) |
+| `provider.ProjectTo<TSource, TDestination>(queryable)` | Same as above, called on the provider directly |
+| `provider.GetProjection<TSource, TDestination>()` | Returns the raw `Expression<Func<TSource, TDestination>>` for custom use |
 
 ### Options
 

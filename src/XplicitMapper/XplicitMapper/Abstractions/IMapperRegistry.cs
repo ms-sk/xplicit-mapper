@@ -28,4 +28,12 @@ public interface IMapperRegistry
     /// <param name="destinationType">Destination type</param>
     /// <param name="mapper">The mapper instance to register</param>
     void Register(Type sourceType, Type destinationType, object mapper);
+
+    /// <summary>
+    /// Registers a projection mapper for the specified type pair.
+    /// </summary>
+    /// <typeparam name="TSource">Source type</typeparam>
+    /// <typeparam name="TDestination">Destination type</typeparam>
+    /// <param name="mapper">The projection mapper instance to register</param>
+    void RegisterProjection<TSource, TDestination>(IXMapperProjection<TSource, TDestination> mapper);
 }

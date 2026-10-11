@@ -18,7 +18,7 @@ var provider = services.BuildServiceProvider();
 
 var mapper = provider.GetService<IMapperProvider>()!;
 
-var list = new List<User>() { new User { Login = "John Doe", Email = "jOhN@examPLe.com" }
+var list = new List<User>() { new() { Login = "John Doe", Email = "jOhN@examPLe.com" }
 
 };
 

@@ -114,4 +114,39 @@ public class MapperRegistry : IMapperRegistry
         _mappers.TryGetValue(key, out var mapper);
         return mapper;
     }
+
+    /// <summary>
+    /// Registers a projection mapper for the specified type pair.
+    /// </summary>
+    /// <typeparam name="TSource">Source type</typeparam>
+    /// <typeparam name="TDestination">Destination type</typeparam>
+    /// <param name="mapper">The projection mapper instance</param>
+    public void RegisterProjection<TSource, TDestination>(IXMapperProjection<TSource, TDestination> mapper)
+    {
+        if (mapper == null)
+            throw new ArgumentNullException(nameof(mapper));
+
+        var key = (typeof(TSource), typeof(TDestination));
+        _mappers[key] = mapper;
+    }
+
+    /// <summary>
+    /// Attempts to get a projection mapper for the specified type pair.
+    /// </summary>
+    /// <typeparam name="TSource">Source type</typeparam>
+    /// <typeparam name="TDestination">Destination type</typeparam>
+    /// <param name="mapper">The projection mapper if found</param>
+    /// <returns>True if found, false otherwise</returns>
+    public bool TryGetProjection<TSource, TDestination>(
+        [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out IXMapperProjection<TSource, TDestination>? mapper)
+    {
+        var key = (typeof(TSource), typeof(TDestination));
+        if (_mappers.TryGetValue(key, out var obj) && obj is IXMapperProjection<TSource, TDestination> typed)
+        {
+            mapper = typed;
+            return true;
+        }
+        mapper = null;
+        return false;
+    }
 }

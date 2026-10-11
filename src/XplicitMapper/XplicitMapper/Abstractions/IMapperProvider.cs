@@ -1,3 +1,5 @@
+using System.Linq.Expressions;
+
 namespace XplicitMapper.Abstractions;
 
 /// <summary>
@@ -79,4 +81,24 @@ public interface IMapperProvider
     /// <param name="cancellationToken">A token to cancel the operation</param>
     /// <returns>A task returning the mapped destination object, or default if no mapper is registered</returns>
     Task<TDestination?> TryMapAsync<TSource, TDestination>(TSource source, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Gets a projection expression for the specified type pair.
+    /// </summary>
+    /// <typeparam name="TSource">Source type</typeparam>
+    /// <typeparam name="TDestination">Destination type</typeparam>
+    /// <returns>An expression that projects TSource to TDestination</returns>
+    /// <exception cref="InvalidOperationException">Thrown if no projection mapper is registered</exception>
+    Expression<Func<TSource, TDestination>> GetProjection<TSource, TDestination>();
+
+    /// <summary>
+    /// Applies the registered projection to an <see cref="IQueryable{T}"/>,
+    /// returning an <see cref="IQueryable{TDestination}"/> that can be executed
+    /// on the database server (e.g., via EF Core).
+    /// </summary>
+    /// <typeparam name="TSource">Source type</typeparam>
+    /// <typeparam name="TDestination">Destination type</typeparam>
+    /// <param name="source">The source queryable</param>
+    /// <returns>A queryable that projects each item to TDestination</returns>
+    IQueryable<TDestination> ProjectTo<TSource, TDestination>(IQueryable<TSource> source);
 }
